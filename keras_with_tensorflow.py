@@ -20,6 +20,14 @@ from sklearn import neighbors, datasets
 from matplotlib import pyplot as plt
 import random
 
+from keras.models import Sequential, Model
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Input
+from keras.layers.core import Flatten, Dropout, Lambda
+from keras.preprocessing.image import ImageDataGenerator
+from keras.optimizers import Adam
+from keras import optimizers
+import tensorflow as tf
+
 # global variables
 MAX_EPOCHS = 650
 STEP_SIZE = .01
@@ -75,20 +83,66 @@ def main():
     X_Mat = np.delete(data_matrix_full, col_length - 1, 1)
     y_vec = data_matrix_full[:,57]
 
-    # First scale the input matrix (each column should have mean 0 and variance 1).
-    # You can do this by subtracting away the mean and then dividing by the standard deviation of each column
-    # (or just use a standard function like scale in R).
     X_sc = scale(X_Mat)
 
-    # (5 points) Next create a variable is.train (logical vector with size equal to the number of observations
-    # in the whole data set). Each element is TRUE if the corresponding observation (row of input matrix)
-    # is in the train set, and FALSE otherwise.
-    # There should be 80% train, 20% test observations (out of all observations in the whole data set).
+
+    # (10 points) Divide the data into 80% train, 20% test observations 
     is_train = np.random.choice( [True, False], X_sc.shape[0], p=[.8, .2] )
 
-    # (5 points) Next create a variable is.subtrain (logical vector with size equal to the
-    # number of observations in the train set).
-    # Each element is TRUE if the corresponding observation is is the subtrain set, and FALSE otherwise.
-    # There should be 60% subtrain, 40% validation observations (out of 100% train observations).
+    # (10 points) Next divide the train data into 60% subtrain, 40% validation
     subtrain_size = np.sum( is_train==True )
     is_subtrain = np.random.choice( [True, False], subtrain_size, p=[.6, .4] )
+    
+    # (10 points) Define three different neural networks, each with one hidden layer, 
+    #   but with different numbers of hidden units (10, 100, 1000). 
+    #   In keras each is a sequential model with one dense layer.
+    
+    # define our optimizer function -- stochastic gradient descent in this case
+    # All parameter gradients will be clipped to
+    # a maximum norm of 1.
+    sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
+
+    model_1 = Sequential()
+    model_1.add(Dense(10, activation='relu'))
+    model_1.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+
+    model_2 = Sequential()
+    model_2.add(Dense(100, activation='relu'))
+    model_2.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+
+    model_3 = Sequential()
+    model_3.add(Dense(1000, activation='relu'))
+    model_3.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+    
+    # (20 points) On the same plot, show the logistic loss as a function of 
+    #   the number of epochs (use a different color for each number of 
+    #   hidden units, e.g. light blue=10, dark blue=100, black=1000, 
+    #   and use a different linetype for each set, 
+    #   e.g. subtrain=solid, validation=dashed). 
+    #   Draw a point to emphasize the minimum of each validation loss curve.
+
+
+    # (10 points) For each of the three networks, define a variable called 
+    #   best_epochs which is the number of epochs which minimizes the 
+    #   validation loss.
+    best_epoch_1 = 0
+    best_epoch_2 = 0
+    best_epoch_3 = 0
+
+    # (10 points) Re-train each network on the entire train set (not just 
+    #   the subtrain set), using the corresponding value of best_epochs 
+    #   (which should be different for each network).
+    # (10 points) Finally use the learned models to make predictions on the test set. What is the prediction accuracy? (percent correctly predicted labels in the test set) What is the prediction accuracy of the baseline model which predicts the most frequent class in the train labels?
+
+
+
+    
+    
+    
+    # EXTRA CREDIT
+    # 10 points if your github repo includes a README.org (or README.md etc) file with a link to the source code of your script, and an explanation about how to install the necessary libraries, and run it on the data set.
+    # 10 points if you do 4-fold cross-validation instead of the single train/test split described above, and you make a plot of test accuracy for all models for each split/fold.
+    # 10 points if you show GradientDescent (from project 1, logistic regression with number of iterations selected by a held-out validation set) in your test accuracy result figure.
+    # 10 points if you show NearestNeighborsCV (from project 2) in your test accuracy figure.
+    # 10 points if you show NNOneSplit (from project 3) in your test accuracy figure.
+    # 10 points if you compute and plot ROC curves for each (test fold, algorithm) combination. Make sure each algorithm is drawn in a different color, and there is a legend that the reader can use to read the figure. 
