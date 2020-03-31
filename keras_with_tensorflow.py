@@ -31,8 +31,7 @@ import tensorflow as tf
 # global variables
 MAX_EPOCHS = 650
 STEP_SIZE = .01
-N_HIDDEN_UNITS = 10
-
+BATCH_SIZE = 64
 
 # Function: split matrix
 # INPUT ARGS:
@@ -90,8 +89,13 @@ def main():
     is_train = np.random.choice( [True, False], X_sc.shape[0], p=[.8, .2] )
 
     # (10 points) Next divide the train data into 60% subtrain, 40% validation
-    subtrain_size = np.sum( is_train==True )
+    subtrain_size = np.sum( is_train == True )
     is_subtrain = np.random.choice( [True, False], subtrain_size, p=[.6, .4] )
+    
+    X_train = np.delete( is_train, np.argwhere(is_subtrain==True), 0)
+    y_train = np.delete(is_subtrain, np.argwhere(is_subtrain == False), 0)
+    X_validation = np.delete(is_train, np.argwhere(is_subtrain == False), 0)
+    y_validation = np.delete(is_subtrain, np.argwhere(is_subtrain == False), 0)
     
     # (10 points) Define three different neural networks, each with one hidden layer, 
     #   but with different numbers of hidden units (10, 100, 1000). 
@@ -102,6 +106,7 @@ def main():
     # a maximum norm of 1.
     sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
+    # define/create models
     model_1 = Sequential()
     model_1.add(Dense(10, activation='relu'))
     model_1.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
@@ -114,6 +119,49 @@ def main():
     model_3.add(Dense(1000, activation='relu'))
     model_3.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
     
+    # train our models
+    # result_1 = model_1.fit(x = X_train, 
+    #                         y = y_train, 
+    #                         #batch_size = ,
+    #                         epochs = MAX_EPOCHS, 
+    #                         steps_per_epoch = STEP_SIZE,
+    #                         validation_data = (X_validation, y_validation))
+
+    # result_2 = model_2.fit(x = X_train, 
+    #                         y = y_train, 
+    #                         #batch_size = ,
+    #                         epochs = MAX_EPOCHS, 
+    #                         steps_per_epoch = STEP_SIZE,
+    #                         validation_data = (X_validation, y_validation))
+
+    # result_3 = model_3.fit(x = X_train, 
+    #                         y = y_train, 
+    #                         #batch_size = ,
+    #                         epochs = MAX_EPOCHS, 
+    #                         steps_per_epoch = STEP_SIZE,
+    #                         validation_data = (X_validation, y_validation))
+
+    result_1 = model_1.fit_generator(X_train,
+                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
+                                #mess around with epochs to find a better accuracy
+                                epochs = MAX_EPOCHS,
+                                validation_data = (X_validation, y_validation),
+                                validation_steps = BATCH_SIZE) 
+    
+    result_2 = model_2.fit_generator(X_train,
+                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
+                                #mess around with epochs to find a better accuracy
+                                epochs = MAX_EPOCHS,
+                                validation_data = (X_validation, y_validation),
+                                validation_steps = BATCH_SIZE) 
+
+    result_3 = model_3.fit_generator(X_train,
+                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
+                                #mess around with epochs to find a better accuracy
+                                epochs = MAX_EPOCHS,
+                                validation_data = (X_validation, y_validation),
+                                validation_steps = BATCH_SIZE) 
+
     # (20 points) On the same plot, show the logistic loss as a function of 
     #   the number of epochs (use a different color for each number of 
     #   hidden units, e.g. light blue=10, dark blue=100, black=1000, 
