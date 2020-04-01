@@ -29,7 +29,7 @@ from keras import optimizers
 import tensorflow as tf
 
 # global variables
-MAX_EPOCHS = 650
+MAX_EPOCHS = 6
 STEP_SIZE = .01
 BATCH_SIZE = 64
 
@@ -84,7 +84,6 @@ def main():
 
     X_sc = scale(X_Mat)
 
-
     # (10 points) Divide the data into 80% train, 20% test observations 
     is_train = np.random.choice( [True, False], X_sc.shape[0], p=[.8, .2] )
 
@@ -92,10 +91,10 @@ def main():
     subtrain_size = np.sum( is_train == True )
     is_subtrain = np.random.choice( [True, False], subtrain_size, p=[.6, .4] )
     
-    X_train = np.delete( is_train, np.argwhere(is_subtrain==True), 0)
-    y_train = np.delete(is_subtrain, np.argwhere(is_subtrain == False), 0)
-    X_validation = np.delete(is_train, np.argwhere(is_subtrain == False), 0)
-    y_validation = np.delete(is_subtrain, np.argwhere(is_subtrain == False), 0)
+    X_train = np.delete( X_sc, np.argwhere( is_subtrain != True ), 0)
+    y_train = np.delete( y_vec, np.argwhere( is_subtrain != True ), 0)
+    X_validation = np.delete( X_sc, np.argwhere( is_subtrain != False ), 0)
+    y_validation = np.delete( y_vec, np.argwhere( is_subtrain != False ), 0)
     
     # (10 points) Define three different neural networks, each with one hidden layer, 
     #   but with different numbers of hidden units (10, 100, 1000). 
@@ -104,63 +103,47 @@ def main():
     # define our optimizer function -- stochastic gradient descent in this case
     # All parameter gradients will be clipped to
     # a maximum norm of 1.
-    sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
+    #sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
     # define/create models
     model_1 = Sequential()
-    model_1.add(Dense(10, activation='relu'))
-    model_1.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+    model_1.add(Dense(units=10, activation='sigmoid', use_bias=False))
+    model_1.add(Dense(1, activation="sigmoid", use_bias=False))
+    model_1.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     model_2 = Sequential()
-    model_2.add(Dense(100, activation='relu'))
-    model_2.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+    model_2.add(Dense(units=100, activation='sigmoid', use_bias=False))
+    model_2.add(Dense(1, activation="sigmoid", use_bias=False))
+    model_2.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     model_3 = Sequential()
-    model_3.add(Dense(1000, activation='relu'))
-    model_3.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
-    
+    model_3.add(Dense(units=1000, activation='sigmoid', use_bias=False))
+    model_3.add(Dense(1, activation="sigmoid", use_bias=False))
+    model_3.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
     # train our models
-    # result_1 = model_1.fit(x = X_train, 
-    #                         y = y_train, 
-    #                         #batch_size = ,
-    #                         epochs = MAX_EPOCHS, 
-    #                         steps_per_epoch = STEP_SIZE,
-    #                         validation_data = (X_validation, y_validation))
+    print(X_train.shape)
+    print(y_train.shape)
+    print(X_validation.shape)
+    print(y_validation.shape)
 
-    # result_2 = model_2.fit(x = X_train, 
-    #                         y = y_train, 
-    #                         #batch_size = ,
-    #                         epochs = MAX_EPOCHS, 
-    #                         steps_per_epoch = STEP_SIZE,
-    #                         validation_data = (X_validation, y_validation))
+    result_1 = model_1.fit( x = X_train,
+                            y = y_train,
+                            epochs = MAX_EPOCHS,
+                            validation_data=(X_validation, y_validation),
+                            verbose=2)
 
-    # result_3 = model_3.fit(x = X_train, 
-    #                         y = y_train, 
-    #                         #batch_size = ,
-    #                         epochs = MAX_EPOCHS, 
-    #                         steps_per_epoch = STEP_SIZE,
-    #                         validation_data = (X_validation, y_validation))
+    result_2 = model_2.fit( x = X_train,
+                            y = y_train,
+                            epochs = MAX_EPOCHS,
+                            validation_data=(X_validation, y_validation),
+                            verbose=2)
 
-    result_1 = model_1.fit_generator(X_train,
-                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
-                                #mess around with epochs to find a better accuracy
-                                epochs = MAX_EPOCHS,
-                                validation_data = (X_validation, y_validation),
-                                validation_steps = BATCH_SIZE) 
-    
-    result_2 = model_2.fit_generator(X_train,
-                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
-                                #mess around with epochs to find a better accuracy
-                                epochs = MAX_EPOCHS,
-                                validation_data = (X_validation, y_validation),
-                                validation_steps = BATCH_SIZE) 
-
-    result_3 = model_3.fit_generator(X_train,
-                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
-                                #mess around with epochs to find a better accuracy
-                                epochs = MAX_EPOCHS,
-                                validation_data = (X_validation, y_validation),
-                                validation_steps = BATCH_SIZE) 
+    result_3 = model_3.fit( x = X_train,
+                            y = y_train,
+                            epochs = MAX_EPOCHS,
+                            validation_data=(X_validation, y_validation),
+                            verbose=2)
 
     # (20 points) On the same plot, show the logistic loss as a function of 
     #   the number of epochs (use a different color for each number of 
@@ -182,15 +165,11 @@ def main():
     #   (which should be different for each network).
     # (10 points) Finally use the learned models to make predictions on the test set. What is the prediction accuracy? (percent correctly predicted labels in the test set) What is the prediction accuracy of the baseline model which predicts the most frequent class in the train labels?
 
-
-
-    
-    
-    
     # EXTRA CREDIT
     # 10 points if your github repo includes a README.org (or README.md etc) file with a link to the source code of your script, and an explanation about how to install the necessary libraries, and run it on the data set.
     # 10 points if you do 4-fold cross-validation instead of the single train/test split described above, and you make a plot of test accuracy for all models for each split/fold.
     # 10 points if you show GradientDescent (from project 1, logistic regression with number of iterations selected by a held-out validation set) in your test accuracy result figure.
     # 10 points if you show NearestNeighborsCV (from project 2) in your test accuracy figure.
     # 10 points if you show NNOneSplit (from project 3) in your test accuracy figure.
-    # 10 points if you compute and plot ROC curves for each (test fold, algorithm) combination. Make sure each algorithm is drawn in a different color, and there is a legend that the reader can use to read the figure. 
+    # 10 points if you compute and plot ROC curves for each (test fold, algorithm) combination. Make sure each algorithm is drawn in a different color, and there is a legend that the reader can use to read the figure.
+main()
