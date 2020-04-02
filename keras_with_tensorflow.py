@@ -107,34 +107,13 @@ def main():
     sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
     # define/create models
+
+    ##### MODEL 10 #####
     model_1 = Sequential()
     model_1.add(Dense(10, activation='relu'))
-    model_1.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
 
-    model_2 = Sequential()
-    model_2.add(Dense(100, activation='relu'))
-    model_2.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
-
-    model_3 = Sequential()
-    model_3.add(Dense(1000, activation='relu'))
-    model_3.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
-    
     # train our models
     # result_1 = model_1.fit(x = X_train, 
-    #                         y = y_train, 
-    #                         #batch_size = ,
-    #                         epochs = MAX_EPOCHS, 
-    #                         steps_per_epoch = STEP_SIZE,
-    #                         validation_data = (X_validation, y_validation))
-
-    # result_2 = model_2.fit(x = X_train, 
-    #                         y = y_train, 
-    #                         #batch_size = ,
-    #                         epochs = MAX_EPOCHS, 
-    #                         steps_per_epoch = STEP_SIZE,
-    #                         validation_data = (X_validation, y_validation))
-
-    # result_3 = model_3.fit(x = X_train, 
     #                         y = y_train, 
     #                         #batch_size = ,
     #                         epochs = MAX_EPOCHS, 
@@ -147,20 +126,58 @@ def main():
                                 epochs = MAX_EPOCHS,
                                 validation_data = (X_validation, y_validation),
                                 validation_steps = BATCH_SIZE) 
-    
-    result_2 = model_2.fit_generator(X_train,
-                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
-                                #mess around with epochs to find a better accuracy
-                                epochs = MAX_EPOCHS,
-                                validation_data = (X_validation, y_validation),
-                                validation_steps = BATCH_SIZE) 
 
-    result_3 = model_3.fit_generator(X_train,
-                                steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
-                                #mess around with epochs to find a better accuracy
-                                epochs = MAX_EPOCHS,
-                                validation_data = (X_validation, y_validation),
-                                validation_steps = BATCH_SIZE) 
+    result_1.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+
+
+    # ##### MODEL 100 #####
+
+    # model_2 = Sequential()
+    # model_2.add(Dense(100, activation='relu'))
+    
+    
+    # # result_2 = model_2.fit(x = X_train, 
+    # #                         y = y_train, 
+    # #                         #batch_size = ,
+    # #                         epochs = MAX_EPOCHS, 
+    # #                         steps_per_epoch = STEP_SIZE,
+    # #                         validation_data = (X_validation, y_validation))
+
+    
+    # result_2 = model_2.fit_generator(X_train,
+    #                             steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
+    #                             #mess around with epochs to find a better accuracy
+    #                             epochs = MAX_EPOCHS,
+    #                             validation_data = (X_validation, y_validation),
+    #                             validation_steps = BATCH_SIZE) 
+    
+    # result_2.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+
+    # ##### MODEL 1000 #####
+    # model_3 = Sequential()
+    # model_3.add(Dense(1000, activation='relu'))
+
+    # # result_3 = model_3.fit(x = X_train, 
+    # #                         y = y_train, 
+    # #                         #batch_size = ,
+    # #                         epochs = MAX_EPOCHS, 
+    # #                         steps_per_epoch = STEP_SIZE,
+    # #                         validation_data = (X_validation, y_validation))
+
+    # result_3 = model_3.fit_generator(X_train,
+    #                             steps_per_epoch = STEP_SIZE, #train_len//TRAIN_BATCH_SIZE
+    #                             #mess around with epochs to find a better accuracy
+    #                             epochs = MAX_EPOCHS,
+    #                             validation_data = (X_validation, y_validation),
+    #                             validation_steps = BATCH_SIZE) 
+
+    # result_3.compile(loss='mean_squared_error', optimizer=sgd, metrics=['accuracy'])
+    
+    
+
+    
+
+    
 
     # (20 points) On the same plot, show the logistic loss as a function of 
     #   the number of epochs (use a different color for each number of 
