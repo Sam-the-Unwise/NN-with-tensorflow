@@ -29,7 +29,7 @@ from keras import optimizers
 import tensorflow as tf
 
 # global variables
-MAX_EPOCHS = 6
+MAX_EPOCHS = 200
 STEP_SIZE = .01
 BATCH_SIZE = 64
 
@@ -65,6 +65,45 @@ def sigmoid(x) :
     x = 1 / (1 + np.exp(-x))
     return x
 
+def create_model() :
+    model = Sequential()
+    model.add(Dense(units=10, activation='sigmoid', use_bias=False))
+    model.add(Dense(1, activation="sigmoid", use_bias=False))
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
+def plot_loss( res_1, res_2, res_3 ) :
+    plt.plot(res_1.history['loss'], color='#30baff', label="10 train")
+    min_index = np.argmin(res_1.history['loss'])
+    plt.plot(min_index, res_1.history['loss'][min_index], "go")
+
+    plt.plot(res_1.history['val_loss'], '--', color='#30baff', label="10 val")
+    res_1_best = np.argmin(res_1.history['val_loss'])
+    plt.plot(res_1_best, res_1.history['val_loss'][res_1_best], "go")
+
+    plt.plot(res_2.history['loss'], color='#185d80', label="100 train")
+    min_index = np.argmin(res_2.history['loss'])
+    plt.plot(min_index, res_2.history['loss'][min_index], "go")
+
+    plt.plot(res_2.history['val_loss'], '--', color='#185d80', label="100 val")
+    res_2_best = np.argmin(res_2.history['val_loss'])
+    plt.plot(res_2_best, res_2.history['val_loss'][res_2_best], "go")
+
+    plt.plot(res_3.history['loss'], color='#040f14', label="1000 train")
+    min_index = np.argmin(res_3.history['loss'])
+    plt.plot(min_index, res_3.history['loss'][min_index], "go")
+
+    plt.plot(res_3.history['val_loss'], '--', color='#040f14', label="1000 val")
+    res_3_best = np.argmin(res_3.history['val_loss'])
+    plt.plot(res_3_best, res_3.history['val_loss'][res_3_best], "go")
+
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(loc='upper left')
+    plt.show()
+
+    return res_1_best+1, res_2_best+1, res_3_best+1
 
 # Function: main
 def main():
@@ -95,7 +134,9 @@ def main():
     y_train = np.delete( y_vec, np.argwhere( is_subtrain != True ), 0)
     X_validation = np.delete( X_sc, np.argwhere( is_subtrain != False ), 0)
     y_validation = np.delete( y_vec, np.argwhere( is_subtrain != False ), 0)
-    
+    X_test = np.delete( X_sc, np.argwhere( is_train != False ), 0 )
+    y_test = np.delete( y_vec, np.argwhere( is_train != False ), 0 )
+
     # (10 points) Define three different neural networks, each with one hidden layer, 
     #   but with different numbers of hidden units (10, 100, 1000). 
     #   In keras each is a sequential model with one dense layer.
@@ -106,27 +147,11 @@ def main():
     #sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
     # define/create models
-    model_1 = Sequential()
-    model_1.add(Dense(units=10, activation='sigmoid', use_bias=False))
-    model_1.add(Dense(1, activation="sigmoid", use_bias=False))
-    model_1.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    model_2 = Sequential()
-    model_2.add(Dense(units=100, activation='sigmoid', use_bias=False))
-    model_2.add(Dense(1, activation="sigmoid", use_bias=False))
-    model_2.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    model_3 = Sequential()
-    model_3.add(Dense(units=1000, activation='sigmoid', use_bias=False))
-    model_3.add(Dense(1, activation="sigmoid", use_bias=False))
-    model_3.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model_1 = create_model()
+    model_2 = create_model()
+    model_3 = create_model()
 
     # train our models
-    print(X_train.shape)
-    print(y_train.shape)
-    print(X_validation.shape)
-    print(y_validation.shape)
-
     result_1 = model_1.fit( x = X_train,
                             y = y_train,
                             epochs = MAX_EPOCHS,
@@ -151,18 +176,42 @@ def main():
     #   and use a different linetype for each set, 
     #   e.g. subtrain=solid, validation=dashed). 
     #   Draw a point to emphasize the minimum of each validation loss curve.
+    # summarize history for loss
+    best_epoch_1, best_epoch_2, best_epoch_3 = plot_loss(result_1, result_2, result_3)
 
-
-    # (10 points) For each of the three networks, define a variable called 
-    #   best_epochs which is the number of epochs which minimizes the 
-    #   validation loss.
-    best_epoch_1 = 0
-    best_epoch_2 = 0
-    best_epoch_3 = 0
-
-    # (10 points) Re-train each network on the entire train set (not just 
+    # (10 points) Re-train each network on the entire train set (not just
     #   the subtrain set), using the corresponding value of best_epochs 
     #   (which should be different for each network).
+    final_model_1 = create_model()
+    final_model_2 = create_model()
+    final_model_3 = create_model()
+
+    final_result_1 = final_model_1.fit( x = X_sc,
+                            y = y_vec,
+                            epochs = best_epoch_1,
+                            verbose=2)
+
+    final_result_2 = final_model_2.fit( x = X_sc,
+                            y = y_vec,
+                            epochs = best_epoch_1,
+                            verbose=2)
+
+    final_result_3 = final_model_3.fit( x = X_sc,
+                            y = y_vec,
+                            epochs = best_epoch_1,
+                            verbose=2)
+
+    y_pred_1 = np.around(final_model_1.predict(X_test))
+    y_pred_2 = np.around(final_model_2.predict(X_test))
+    y_pred_3 = np.around(final_model_3.predict(X_test))
+
+    print("Prediction accuracy (correctly labeled) for 10   hidden units :", np.mean(y_pred_1 == y_test))
+    print("Prediction accuracy (correctly labeled) for 100  hidden units :", np.mean(y_pred_2 == y_test))
+    print("Prediction accuracy (correctly labeled) for 1000 hidden units :", np.mean(y_pred_3 == y_test))
+
+    baseline = np.zeros(y_test.shape)
+    print("Baseline prediction accuracy :", np.mean(baseline == y_test))
+
     # (10 points) Finally use the learned models to make predictions on the test set. What is the prediction accuracy? (percent correctly predicted labels in the test set) What is the prediction accuracy of the baseline model which predicts the most frequent class in the train labels?
 
     # EXTRA CREDIT
