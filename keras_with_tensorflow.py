@@ -29,7 +29,7 @@ from keras import optimizers
 import tensorflow as tf
 
 # global variables
-MAX_EPOCHS = 200
+MAX_EPOCHS = 1000
 # Function: split matrix
 # INPUT ARGS:
 #   X_mat : matrix to be split
@@ -62,11 +62,12 @@ def sigmoid(x) :
     x = 1 / (1 + np.exp(-x))
     return x
 
-def create_model() :
+def create_model(units) :
+    sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
     model = Sequential()
-    model.add(Dense(units=10, activation='sigmoid', use_bias=False))
+    model.add(Dense(units=units, activation='sigmoid', use_bias=False))
     model.add(Dense(1, activation="sigmoid", use_bias=False))
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
     return model
 
 def plot_loss( res_1, res_2, res_3 ) :
@@ -144,9 +145,9 @@ def main():
     #sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
     # define/create models
-    model_1 = create_model()
-    model_2 = create_model()
-    model_3 = create_model()
+    model_1 = create_model(10)
+    model_2 = create_model(100)
+    model_3 = create_model(1000)
 
     # train our models
     result_1 = model_1.fit( x = X_train,
@@ -179,9 +180,9 @@ def main():
     # (10 points) Re-train each network on the entire train set (not just
     #   the subtrain set), using the corresponding value of best_epochs 
     #   (which should be different for each network).
-    final_model_1 = create_model()
-    final_model_2 = create_model()
-    final_model_3 = create_model()
+    final_model_1 = create_model(10)
+    final_model_2 = create_model(100)
+    final_model_3 = create_model(1000)
 
     final_result_1 = final_model_1.fit( x = X_sc,
                             y = y_vec,
