@@ -30,9 +30,6 @@ import tensorflow as tf
 
 # global variables
 MAX_EPOCHS = 200
-STEP_SIZE = .01
-BATCH_SIZE = 64
-
 # Function: split matrix
 # INPUT ARGS:
 #   X_mat : matrix to be split
@@ -201,13 +198,9 @@ def main():
                             epochs = best_epoch_1,
                             verbose=2)
 
-    y_pred_1 = np.around(final_model_1.predict(X_test))
-    y_pred_2 = np.around(final_model_2.predict(X_test))
-    y_pred_3 = np.around(final_model_3.predict(X_test))
-
-    print("Prediction accuracy (correctly labeled) for 10   hidden units :", np.mean(y_pred_1 == y_test))
-    print("Prediction accuracy (correctly labeled) for 100  hidden units :", np.mean(y_pred_2 == y_test))
-    print("Prediction accuracy (correctly labeled) for 1000 hidden units :", np.mean(y_pred_3 == y_test))
+    print("Prediction accuracy (correctly labeled) for 10   hidden units :", final_model_1.evaluate(X_test,y_test)[1])
+    print("Prediction accuracy (correctly labeled) for 100  hidden units :", final_model_2.evaluate(X_test,y_test)[1])
+    print("Prediction accuracy (correctly labeled) for 1000 hidden units :", final_model_3.evaluate(X_test,y_test)[1])
 
     baseline = np.zeros(y_test.shape)
     print("Baseline prediction accuracy :", np.mean(baseline == y_test))
