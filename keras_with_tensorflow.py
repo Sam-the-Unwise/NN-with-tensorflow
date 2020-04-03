@@ -11,12 +11,6 @@
 import numpy as np
 import csv, math
 from math import sqrt
-from sklearn.neighbors import NearestNeighbors as NN
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import scale
-from sklearn.metrics import zero_one_loss
-from sklearn.metrics import log_loss
-from sklearn import neighbors, datasets
 from matplotlib import pyplot as plt
 import random
 
@@ -28,8 +22,16 @@ from keras.optimizers import Adam
 from keras import optimizers
 import tensorflow as tf
 
+
+from SG_with_early_stopping_regularization import SG_main
+from nearest_neightbors import NN_main
+from gradientDescent import GD_main
+
 # global variables
 MAX_EPOCHS = 1000
+DATA_FILE = "spam.data"
+
+
 # Function: split matrix
 # INPUT ARGS:
 #   X_mat : matrix to be split
@@ -62,14 +64,22 @@ def sigmoid(x) :
     x = 1 / (1 + np.exp(-x))
     return x
 
+
+# function that will create our NN model given the amount of units passed in
 def create_model(units) :
     sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
+    
     model = Sequential()
+    
     model.add(Dense(units=units, activation='sigmoid', use_bias=False))
     model.add(Dense(1, activation="sigmoid", use_bias=False))
+    
     model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
+    
     return model
 
+
+# function to plot our loss
 def plot_loss( res_1, res_2, res_3 ) :
     plt.plot(res_1.history['loss'], color='#30baff', label="10 train")
     min_index = np.argmin(res_1.history['loss'])
@@ -103,12 +113,13 @@ def plot_loss( res_1, res_2, res_3 ) :
 
     return res_1_best+1, res_2_best+1, res_3_best+1
 
+
 # Function: main
 def main():
     print("starting")
     # use spam data set
 
-    data_matrix_full = convert_data_to_matrix("spam.data")
+    data_matrix_full = convert_data_to_matrix(DATA_FILE)
     np.random.seed( 0 )
     np.random.shuffle(data_matrix_full)
 
@@ -144,6 +155,7 @@ def main():
     # a maximum norm of 1.
     #sgd = optimizers.SGD(lr=0.01, clipnorm=1.)
 
+    print("Creating model...")
     # define/create models
     model_1 = create_model(10)
     model_2 = create_model(100)
@@ -177,6 +189,7 @@ def main():
     # summarize history for loss
     best_epoch_1, best_epoch_2, best_epoch_3 = plot_loss(result_1, result_2, result_3)
 
+    print("Finalizing model")
     # (10 points) Re-train each network on the entire train set (not just
     #   the subtrain set), using the corresponding value of best_epochs
     #   (which should be different for each network).
@@ -199,6 +212,7 @@ def main():
                             epochs = best_epoch_1,
                             verbose=2)
 
+    # (10 points) Finally use the learned models to make predictions on the test set. What is the prediction accuracy? (percent correctly predicted labels in the test set) What is the prediction accuracy of the baseline model which predicts the most frequent class in the train labels?
     print("Prediction accuracy (correctly labeled) for 10   hidden units :", final_model_1.evaluate(X_test,y_test)[1])
     print("Prediction accuracy (correctly labeled) for 100  hidden units :", final_model_2.evaluate(X_test,y_test)[1])
     print("Prediction accuracy (correctly labeled) for 1000 hidden units :", final_model_3.evaluate(X_test,y_test)[1])
@@ -206,13 +220,34 @@ def main():
     baseline = np.zeros(y_test.shape)
     print("Baseline prediction accuracy :", np.mean(baseline == y_test))
 
-    # (10 points) Finally use the learned models to make predictions on the test set. What is the prediction accuracy? (percent correctly predicted labels in the test set) What is the prediction accuracy of the baseline model which predicts the most frequent class in the train labels?
+    
 
     # EXTRA CREDIT
-    # 10 points if your github repo includes a README.org (or README.md etc) file with a link to the source code of your script, and an explanation about how to install the necessary libraries, and run it on the data set.
-    # 10 points if you do 4-fold cross-validation instead of the single train/test split described above, and you make a plot of test accuracy for all models for each split/fold.
-    # 10 points if you show GradientDescent (from project 1, logistic regression with number of iterations selected by a held-out validation set) in your test accuracy result figure.
-    # 10 points if you show NearestNeighborsCV (from project 2) in your test accuracy figure.
-    # 10 points if you show NNOneSplit (from project 3) in your test accuracy figure.
-    # 10 points if you compute and plot ROC curves for each (test fold, algorithm) combination. Make sure each algorithm is drawn in a different color, and there is a legend that the reader can use to read the figure.
+    # 10 points if you do 4-fold cross-validation instead of the single train/test 
+    #   split described above, and you make a plot of test accuracy for all models 
+    #   for each split/fold.
+    
+
+    # 10 points if you show GradientDescent (from project 1, logistic regression 
+    #   with number of iterations selected by a held-out validation set) in your 
+    #   test accuracy result figure.
+    # 10 points if you show NearestNeighborsCV (from project 2) in your test 
+    #   accuracy figure
+    # 10 points if you show NNOneSplit (from project 3) in your test accuracy 
+    #   figure
+
+    gd_accuracy, gd_roc_curve_info = GD_main()
+
+    nn_list_of_elements, nn_mean_accuracy = NN_main()
+
+    sg_v_mat, sg_w_vec, sg_loss_values = SG_main()
+
+
+
+
+    # 10 points if you compute and plot ROC curves for each (test fold, 
+    #   algorithm) combination. Make sure each algorithm is drawn in a different color, and there is a legend that the reader can use to read the figure.
 main()
+
+
+# %%
