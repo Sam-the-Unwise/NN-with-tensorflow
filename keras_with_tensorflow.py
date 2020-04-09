@@ -14,6 +14,7 @@ from math import sqrt
 from matplotlib import pyplot as plt
 import random
 
+from sklearn.preprocessing import scale
 from keras.models import Sequential, Model
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Input
 from keras.layers.core import Flatten, Dropout, Lambda
