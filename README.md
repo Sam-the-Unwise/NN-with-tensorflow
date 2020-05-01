@@ -5,10 +5,16 @@ Below is a link to the source data for this project: https://github.com/Sam-the-
 
 
 ## Prerequisits
+```
+python
+```
+Install
+```
 sudo apt update
 sudo apt install python3-dev python3-pip
 sudo pip3 install tensorflow
 sudo pip3 install keras
+```
 
 
 ## Running Code Instructions
